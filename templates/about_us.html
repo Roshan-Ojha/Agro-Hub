@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About us</title>
+</head>
+
+<body>
+
+    {%extends "account.html"%}
+
+    {%block content%}
+    <section id="home">
+        <div id="about_us">
+            <img src="static/logo.png" height="60" width="60" alt="">
+            <span id="agrohub">Agro Hub</span>
+        </div>
+        <div id="content">
+            <p>
+                Agro Hub is a QA site for professional and enthusiast farmers.
+                It is a privately held website created in 2020 by Roshan Ojha.
+                It features questions and answers on any topic in farming.
+            </p>
+            <p>
+                The website serves as a platform for users to ask and
+                answer questions, and to buy and sell agricultural products.
+            </p>
+            <p>
+                <span id="technology" style="font-weight: bold;">Technology: </span>
+                HTML, CSS, Jquery and Jinja2 are used fo frontend, Flask for backend and Sqlite3 for database.
+            </p>
+        </div>
+    </section>
+
+    <style>
+        @font-face {
+            font-family: Monoton;
+            src: url(static/Monoton-Regular.ttf);
+        }
+
+        @font-face {
+            font-family: MontserratAlternates;
+            src: url(static/MontserratAlternates-Regular.ttf);
+        }
+        
+        #content{
+            margin-top: 15px;
+        }
+        p{
+            font-size: 21px;
+            padding-bottom: 10px;
+            color: #143e06;
+            text-shadow: 0 0 0px #fff,
+                0 0 2px #fff,
+                0 0 7px  #fff,
+                0 0 12px #fff;
+        }
+
+        #agrohub {
+            font-size: 45px;
+            font-family: MontserratAlternates;
+            padding-left: 20px;
+            color: #169945;
+            font-weight: bold;
+        }
+
+        #about_us {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #home {
+            display: flex;
+            flex-direction: column;
+            padding: 3px 200px;
+            justify-content: center;
+            align-items: center;
+            height: 557px;
+        }
+
+        #home::before {
+            content: "";
+            background: url('static/image1.jpg') no-repeat center center/cover;
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+    </style>
+
+    {%endblock%}
+</body>
+
+</html>

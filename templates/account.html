@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="static\jquery-3.5.1.min.js"></script>
+    <script src="static\socket.io.min.js"></script>
+    <title>Account</title>
+</head>
+
+<body>
+
+    <nav id="navbar">
+        <div id="logo">
+            <img src="static/logo.png" height="30" width="30" alt="">
+        </div>
+
+        <ul>
+
+            <li class="item"><a href="{{url_for('about_us')}}">About Us</a></li>
+            <li class="item"><a href="{{url_for('queries')}}">Queries</a></li>
+     
+            <li class="item"><a href="{{url_for('products')}}">Products</a></li>
+         
+            {%if session['login']%}
+            <li class="item" style="padding-left: 480px;"><a href="{{url_for('logout')}}">Log out</a></li>
+            {%endif%}
+
+        </ul>
+
+
+    </nav>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        #navbar {
+
+            display: flex;
+            align-items: center;
+            position: relative;
+            height: 47px;
+        }
+
+        #navbar::before {
+            content: "";
+            background-color: black;
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        #logo {
+            margin: 10px 34px;
+        }
+
+        #logo img {
+
+            margin: 3px 6px;
+        }
+
+        #navbar ul {
+
+            display: flex;
+        }
+
+        #navbar ul li {
+            list-style: none;
+            font-size: 20px;
+        }
+
+        #navbar ul li a {
+            display: block;
+            padding: 3px 22px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: white;
+        }
+
+        #navbar ul li a:hover {
+
+            color: black;
+            background-color: white;
+        }
+    </style>
+
+    {%block content%}
+
+    <section id="home">
+
+        <div id="photo">
+
+        </div>
+        <form id="image_form">
+            <input type="file" id="image">
+            <input type="submit" value="Upload" id="btn" style="display: none;">
+        </form>
+
+    </section>
+
+
+    <section id="question_answer">
+
+        <h2 class="h3" id="for_question">Ask Question</h2>
+        <div class="question_box" style="display: none;">
+
+            <h2 id="h2">Ask Question</h2>
+            <form action="" id="ask_question">
+
+                <div class="txt_field">
+                    <input type="text" id="question_title" required>
+                    <label>Title</label>
+                </div>
+
+                <div class="txt_field">
+                    <textarea name="" id="question" required></textarea>
+                    <label>Question</label>
+                </div>
+
+                <div class="view_photo" id="question_photo"></div>
+                <input type="file" id="question_image">
+
+                <input type="submit" id="ask" value="Ask">
+            </form>
+
+
+        </div>
+        <h2 class="h3" id="for_product">Add Product</h2>
+        <div class="product_box" style="display: none;">
+
+            <h2 id="h2">Add Product</h2>
+
+            <form action="" id="add_product">
+
+                <div class="txt_field">
+                    <input type="text" id="product_title" required>
+                    <label>Title</label>
+                </div>
+
+                <div class="txt_field">
+                    <textarea name="" id="descreption" required></textarea>
+                    <label>Description</label>
+                </div>
+                <div class="view_photo" id="product_photo">
+
+                </div>
+
+                <input type="file" id="product_image">
+                <input type="submit" id="add" value="Add">
+            </form>
+
+
+        </div>
+
+
+
+    </section>
+
+    <section id="question_product">
+        {%for da in data%}
+        <div class="backend_div" id="{{da[0]}}backnd_div">
+            <div class="backend_title" id="{{da[0]}}backend_title"> {{da[2]}}</div>
+            <div class="backend_description" id="{{da[0]}}backend_description">{{da[3]}}</div>
+            <div class="backend_image" id="{{da[0]}}backend_image"><img src="{{da[4]}}" height="150px" width="200px"
+                    alt=""></div>
+
+            {%if da[5]=="product"%}
+            {%for pro in product%}
+            {%if da[0]==pro[0]%}
+            <div class="want_to_buy">{{pro[3]}} want to buy your product. Contact him/her through {{pro[2]}}</div>
+            {%endif%}
+            {%endfor%}
+            <button class="delete_button" id="{{da[0]}}_{{da[5]}}">Delete this product</button>
+            {%elif da[5]=="question"%}
+            {%for answer in answers%}
+            {%if da[0]==answer[0]%}
+            <section id="answers">
+                <div id="ans">{{answer[2]}}</div>
+                <div id="photo"><img src="{{answer[3]}}" height="150px" width="200px" alt=""></div>
+                <div id="answered_by"><span id="ans_by">Answered by: {{answer[4]}}</span></div>
+            </section>
+
+            {%endif%}
+            {%endfor%}
+            <button class="delete_button" id="{{da[0]}}_{{da[5]}}">Delete this question</button>
+            {%endif%}
+        </div>
+        {%endfor%}
+
+    </section>
+
+    <style>
+        body {
+            background: linear-gradient(120deg, #2980b9, #8e44ad);
+        }
+
+        #home {
+            display: flex;
+            align-items: center;
+
+        }
+
+        #question_answer {
+            display: flex;
+            align-items: center;
+            margin-top: 80px;
+
+            justify-content: center;
+
+        }
+
+        #question_product {
+            display: flex;
+            flex-direction: column;
+            margin-top: 60px;
+            padding-left: 100px;
+
+
+        }
+
+        #photo {
+            background: no-repeat center center/cover;
+            background-color: lightblue;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            margin-top: 30px;
+            margin-left: 30px;
+        }
+
+        .thumb-image {
+            background: no-repeat center center/cover;
+            background-color: lightblue;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            margin-top: 0px;
+            margin-left: 0px;
+        }
+
+        #user_name {
+
+
+            font-weight: bold;
+        }
+
+        .question_box {
+            width: 400px;
+
+            margin: 5px;
+            background: #fff;
+            margin-right: 400px;
+            padding: 40px;
+            box-sizing: border-box;
+            border: 1px solid rgba(0, 0, 0, .1);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+        }
+
+        .product_box {
+            width: 400px;
+
+            margin: 5px;
+            background: #fff;
+            padding: 40px;
+            box-sizing: border-box;
+            border: 1px solid rgba(0, 0, 0, .1);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+        }
+
+        #h2,
+        .h3 {
+            margin: 0 0 40px;
+            padding: 0;
+            color: #f74978;
+            text-transform: uppercase;
+        }
+
+        #question_answer input {
+            padding: 10px 0;
+            margin-bottom: 30px;
+        }
+
+        textarea {
+            height: 80px;
+            padding: 10px 0;
+            margin-bottom: 40px;
+        }
+
+        #question_answer input,
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: none;
+            outline: none;
+            border: none;
+            border-bottom: 2px solid #999;
+        }
+
+        textarea {
+            margin-bottom: 20px;
+        }
+
+        #question_answer input[type="submit"] {
+            border-bottom: none;
+            cursor: pointer;
+            background: #f7497d;
+            color: #fff;
+            margin-bottom: 0;
+            text-transform: uppercase;
+        }
+
+        .txt_field {
+            position: relative;
+        }
+
+        .txt_field label {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            color: #999;
+            transition: .5s;
+            pointer-events: none;
+        }
+
+        #question_answer input:focus~label,
+        textarea:focus~label,
+        #question_answer input:valid~label,
+        textarea:valid~label {
+            top: -12px;
+            left: 0;
+            color: #f7497d;
+            font-weight: bold;
+
+        }
+
+        #question_answer input:focus,
+        textarea:focus,
+        #question_answer input:valid,
+        textarea:valid {
+            border-bottom: 2px solid #f7497d;
+        }
+
+        #for_question {
+
+            margin-right: 800px;
+        }
+
+        .h3 {
+            cursor: pointer;
+
+        }
+
+        .view_photo {
+            background: no-repeat center center/cover;
+            background-color: lightblue;
+
+            width: 359px;
+            height: 172px;
+            margin-top: 5px;
+            margin-left: -20px;
+            margin-bottom: 30px;
+        }
+
+        #question_photo {
+            background: no-repeat center center/cover;
+            background-color: lightblue;
+
+            width: 359px;
+            height: 172px;
+            margin-bottom: 30px;
+        }
+
+        .css_product_class {
+            padding-left: 212px;
+            height: 616px;
+            width: 198px;
+
+        }
+
+        .css_question_class {
+            height: 616px;
+
+        }
+
+        .backend_title {
+            color: #8ae3ec;
+            font-size: 25px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .backend_div {
+            margin-top: 25px;
+            border: 2px solid black;
+            padding-top: 2px;
+            padding-bottom: 20px;
+            padding-left: 24px;
+            width: 1111px;
+        }
+
+        .backend_description {
+            padding-top: 15px;
+            padding-bottom: 10px;
+
+        }
+
+        .backend_image {
+            padding-bottom: 10px;
+        }
+
+        .delete_button {
+            margin-left: 201px;
+            width: 165px;
+            height: 30px;
+            cursor: pointer;
+            background-color: #f74978;
+            border: none;
+            font-size: 18px;
+            color: white;
+        }
+
+        .delete_button:hover {
+            color: black;
+        }
+
+        #answers {
+
+            margin-top: 30px;
+            margin-bottom: 30px;
+            padding-left: 15px;
+            font-size: 17px;
+            border-bottom: 2px solid black;
+        }
+
+        #ans {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            color: white;
+            text-shadow: 0 0 0px #fff,
+                0 0 2px #fff,
+                0 0 7px #7CFC00,
+                0 0 12px #7cfc00;
+        }
+
+        #answered_by {
+            text-align: right;
+            padding-bottom: 5px;
+        }
+
+        #ans_by {
+            margin-right: 12px;
+
+        }
+
+      #answers  #photo{
+            
+    width: 200px;
+    height: 150px;
+
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            $("#image").on('change', function () {
+                $("#btn").show();
+                if (typeof (FileReader) != "undefined") {
+                    var photo = $('#photo');
+                    photo.empty();
+
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+
+                        window.image_string = e.target.result
+                        $("<img>", {
+                            "src": e.target.result,
+                            "class": "thumb-image"
+
+                        }).appendTo(photo);
+                    }
+                    photo.show();
+                    reader.readAsDataURL($(this)[0].files[0]);
+
+                }
+                else {
+                    alert("This browser does not support Filereader");
+                }
+            });
+
+            $("#question_image").on('change', function () {
+
+                if (typeof (FileReader) != "undefined") {
+                    var photo = $('#question_photo');
+                    photo.empty();
+
+                    var reader = new FileReader();
+                    reader.onload = function (question_event) {
+                        window.question_photo = question_event.target.result;
+                        $("<img>", {
+                            "src": question_event.target.result,
+                            "id": "question_photo"
+
+                        }).appendTo(photo);
+                    }
+                    photo.show();
+                    reader.readAsDataURL($(this)[0].files[0]);
+
+                }
+                else {
+                    alert("This browser does not support Filereader");
+                }
+            });
+
+            $("#product_image").on('change', function () {
+
+                if (typeof (FileReader) != "undefined") {
+                    var photo = $('#product_photo');
+                    photo.empty();
+
+                    var reader = new FileReader();
+                    reader.onload = function (product_event) {
+                        window.product_photo = product_event.target.result;
+                        $("<img>", {
+                            "src": product_event.target.result,
+                            "id": "question_photo"
+
+                        }).appendTo(photo);
+                    }
+                    photo.show();
+                    reader.readAsDataURL($(this)[0].files[0]);
+
+                }
+                else {
+                    alert("This browser does not support Filereader");
+                }
+            });
+
+            $("#image_form").submit(function (event) {
+                console.log(image_string)
+                $.ajax({
+                    data: {
+                        photooo: window.image_string
+                    },
+                    url: '/savephoto',
+                    type: 'POST'
+
+                })
+                    .done(function (data) {
+                        console.log("succes");
+                        // console.log(image_string);
+                    });
+                event.preventDefault();
+            });
+
+            var user_photo = "{{user_photo[0][3]}}";
+            $("#photo").append('<img src="{{user_photo[0][3]}}" class="thumb-image" alt="">' + '<span id="user_name">' + '{{user_photo[0][0]}}' + '</span>')
+
+            $("#for_question").click(function () {
+                $("#for_question").hide();
+                $(".question_box").slideDown("slow")
+                $("#for_product").addClass("css_product_class")
+
+
+            });
+            $("#for_product").click(function () {
+                $("#for_product").hide();
+                $(".product_box").slideDown("slow");
+                $("#for_question").addClass("css_question_class")
+                $("#for_question").css({
+                    "margin-right": "588px",
+                    "padding-left": "44px"
+                })
+                console.log("Hello");
+
+            });
+
+            $("#ask_question").submit(function (event) {
+
+                try {
+                    $.ajax({
+                        data: {
+                            title: $("#question_title").val(),
+                            question: $("#question").val(),
+                            question_photo: window.question_photo
+                        },
+                        type: 'POST',
+                        url: '/question'
+                    })
+                        .done(function (data) {
+                            var a = window.question_photo;
+                            $(location).attr('href', '/account');
+                        });
+                    event.preventDefault();
+                } catch (error) {
+                    $.ajax({
+                        data: {
+                            title: $("#question_title").val(),
+                            question: $("#question").val(),
+                            question_photo: null
+                        },
+                        type: 'POST',
+                        url: '/question'
+                    })
+                        .done(function (data) {
+                            var a = window.question_photo;
+                            $(location).attr('href', '/account');
+                        });
+                    event.preventDefault();
+                }
+
+            });
+
+            $("#add_product").submit(function (event) {
+                try {
+                    $.ajax({
+                        data: {
+                            title: $("#product_title").val(),
+                            description: $("#descreption").val(),
+                            product_photo: window.product_photo
+                        },
+                        type: 'POST',
+                        url: '/product'
+                    })
+                        .done(function (data) {
+                            $(location).attr("href", "/account");
+                        });
+                    event.preventDefault
+                } catch (error) {
+                    $.ajax({
+                        data: {
+                            title: $("#product_title").val(),
+                            description: $("#descreption").val(),
+                            product_photo: null
+                        },
+                        type: 'POST',
+                        url: '/product'
+                    })
+                        .done(function (data) {
+                            $(location).attr("href", "/account");
+                        });
+                    event.preventDefault
+                }
+            });
+
+            $(".delete_button").click(function (event) {
+                var id = $(this).attr("id");
+                console.log(id);
+                if (confirm("Are you sure you want to delete this")) {
+                    console.log("Deleted");
+                    var time_type = id.split("_");
+                    console.log(time_type[0])
+                    console.log(time_type[1])
+
+                    $.ajax({
+                        data: {
+                            data_time: time_type[0],
+                            data_type: time_type[1]
+                        },
+                        type: 'POST',
+                        url: '/delete'
+                    })
+                        .done(function (data) {
+                            $(location).attr('href', '/account');
+                        });
+                    event.preventDefault();
+
+                }
+                else {
+                    console.log("Not deleted")
+                }
+            });
+
+        });
+    </script>
+    {%endblock%}
+</body>
+
+</html>

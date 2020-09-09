@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="static\jquery-3.5.1.min.js"></script>
+    <script src="static\socket.io.min.js"></script>
+    <title>Products</title>
+</head>
+
+<body>
+
+    {%extends "account.html"%}
+    {%block content%}
+
+    <section id="root">
+        {%for product in products%}
+        <section class="products" id="{{product[0]}}_product">
+            <div class="title" id="{{product[0]}}_title">{{product[2]}}</div>
+            <div class="description" id="{{product[0]}}_description">{{product[3]}}</div>
+            <div class="photo" id="{{product[0]}}"><img src="{{product[4]}}" height="150px" width="200px" alt=""></div>
+            <div id="added_by"><span id="add_by">Merchandiser: {{product[6]}}</span></div>
+            
+            {%if session['login']%}
+            {%set ns =  namespace(buyed=false)%}
+           
+            {%if status==[]%}
+            {%if product[1]==session['mail']%}
+            <div class="buybutton" id="{{product[0]}}_buybutton"><button type="button" class="buy"
+                id="{{product[0]}}_buy" disabled style="width: 300px;">You cant buy your own product</button></div>
+                {%set ns.buyed=True%}
+                {%endif%}
+
+            {%endif%}
+            
+            {%for stas in status%}
+            {%if product[1]==session['mail']%}
+            <div class="buybutton" id="{{product[0]}}_buybutton"><button type="button" class="buy"
+                id="{{product[0]}}_buy" disabled style="width: 300px;">You cant buy your own product</button></div>
+            {%set ns.buyed=True%}
+            {%elif product[0]==stas[0] and session['mail']==stas[2]%}
+            <div class="buybutton" id="{{product[0]}}_buybutton"><button type="button" class="buy"
+                    id="{{product[0]}}_buy" disabled>Already buyed</button></div>
+                    {%set ns.buyed=True%}
+            {%break%}
+            {%else%}
+            {%set ns.buyed=False%}
+            {%endif%}
+            {%endfor%}
+
+            {{buyed}}
+
+            {%if ns.buyed%}
+            {%else%}
+            <div class="buybutton" id="{{product[0]}}_buybutton"><button type="button" class="buy"
+                id="{{product[0]}}_buy">Buy this product</button></div>
+            {%endif%}
+            {%endif%}
+        </section>
+        {%endfor%}
+    </section>
+
+    <style>
+        body {
+            background: linear-gradient(to left, #bdc3c7, #2c3e50);
+            width: 100%;
+            height: 100vh;
+        }
+
+        #root {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            /* justify-content: center;  */
+
+            margin-top: 50px;
+        }
+
+        .products {
+            width: 1111px;
+            margin-bottom: 50px;
+            border: 1px solid #ff69b4;
+            box-shadow: 0 0 0px #000,
+                0 0 5px #000,
+                0 0 10px #ff69B4,
+                0 0 12px #ff69B4;
+
+            border-radius: 20px;
+        }
+
+        .title {
+            font-size: 22px;
+            color: #fff;
+
+            text-shadow: 0 0 0px #fff,
+                0 0 5px #fff,
+                0 0 10px #0073e6,
+                0 0 15px #0073e6,
+                0 0 20px #0073e6,
+                0 0 25px #0073e6,
+                0 0 30px #0073e6;
+            padding-left: 12px;
+        }
+
+        .description {
+            padding-top: 10px;
+            padding-left: 12px;
+            padding-bottom: 10px;
+            font-size: 17px;
+            color: white;
+            text-shadow: 0 0 0px #fff,
+                0 0 2px #fff,
+                0 0 7px #ff69B4,
+                0 0 12px #ff69B4;
+        }
+
+        .photo {
+            padding-left: 10px;
+            padding-bottom: 12px;
+        }
+
+        #added_by {
+            text-align: right;
+            padding-bottom: 5px;
+        }
+
+        #add_by {
+            margin-right: 12px;
+        }
+
+        .buy {
+
+            width: 165px;
+            height: 30px;
+            cursor: pointer;
+            background-color: #f74978;
+            border: none;
+            font-size: 18px;
+            color: white;
+        }
+
+        .buy:disabled {
+            background-color: #f88ba8;
+            cursor: no-drop;
+        }
+
+        .buy:disabled:hover {
+            color: white;
+        }
+
+        .buy:hover {
+            color: black;
+        }
+
+        .buybutton {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+    </style>
+
+    <script>
+
+        $(document).ready(function () {
+            $('.buy').click(function (event) {
+                var id = $(this).attr('id');
+                var new_id = id.split("_")
+                var time = new_id[0];
+                console.log(id);
+                console.log(time)
+                $(this).attr('disabled','true')
+                $(this).html("Already buyed")
+                $.ajax({
+                    data: {
+                        added_time: time
+                    },
+                    type: 'POST',
+                    url: '/saveproduct'
+                })
+                    .done(function (data) {
+                        console.log('sucess')
+                    });
+                event.preventDefault();
+            });
+
+
+        });
+    </script>
+
+    {%endblock%}
+
+
+</body>
+
+</html>

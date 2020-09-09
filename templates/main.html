@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="static\jquery-3.5.1.min.js"></script>
+  <script src="static\socket.io.min.js"></script>
+  <title>Agro Hub</title>
+</head>
+
+<body>
+
+
+  <nav id="navbar">
+    <div id="logo">
+      <img src="static/logo.png" height="30" width="30" alt="" >
+    </div>
+
+    <ul>
+
+      <li class="item"><a href="{{url_for('about_us')}}">About Us</a></li>
+      <li class="item"><a href="{{url_for('queries')}}">Queries</a></li>
+      
+      <li class="item"><a href="{{url_for('products')}}">Products</a></li>
+      
+      {%if session['login']%}
+      <li class="item" style="padding-left: 480px;"><a href="{{url_for('logout')}}">Log out</a></li>
+      {%endif%}
+    </ul>
+
+
+  </nav>
+
+
+
+
+  <section id="home">
+    {%if session['login']%}
+    .sd
+    {%else%}
+
+    {%block content%}
+
+    <div class="center">
+      {%for message in get_flashed_messages()%}
+      <div class="alert">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        {{message}}
+      </div>
+      {%endfor%}
+
+      <h1>Login</h1>
+      <form action="" method="">
+
+        <div class="txt_field">
+          <input id="mail" type="email" required>
+          <span id="span"></span>
+          <label for="mail">Email</label>
+        </div>
+
+        <div class="txt_field">
+          <input id="pass" type="password" required>
+          <span id="span"></span>
+          <label for="pass">Password</label>
+        </div>
+        <div id="match"></div>
+        <input type="submit" value="Login">
+
+        <div class="signup_link">
+          Don't have an account? <a href="{{url_for('signup')}}">Signup</a>
+        </div>
+
+
+      </form>
+
+    </div>
+
+    <script>
+
+      $(document).ready(function () {
+        $('form').submit(function (event) {
+          $.ajax({
+            data: {
+              email: $("#mail").val(),
+              password: $("#pass").val()
+            },
+            type: 'POST',
+            url: '/login'
+          })
+            .done(function (data) {
+              if (data.st) {
+                $(location).attr('href', '/account');
+              }
+              else {
+                if (data.no_mail) {
+                  $("#match").html("No such email in the database")
+                }
+                else {
+                  $("#match").html("Wrong Password");
+                }
+
+              }
+            });
+          event.preventDefault();
+        });
+      });
+
+    </script>
+
+    {%endblock%}
+
+  </section>
+  {%endif%}
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    #navbar {
+      display: flex;
+      align-items: center;
+      position: relative;
+      height: 47px;
+    }
+
+    #navbar::before {
+      content: "";
+      background-color: black;
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      z-index: -1;
+      opacity: 0.4;
+    }
+
+    #logo {
+      margin: 10px 34px;
+    }
+
+    #logo img {
+
+      margin: 3px 6px;
+    }
+
+    #navbar ul {
+      display: flex;
+    }
+
+    #navbar ul li {
+      list-style: none;
+      font-size: 20px;
+    }
+
+    #navbar ul li a {
+      display: block;
+      padding: 3px 22px;
+      border-radius: 20px;
+      text-decoration: none;
+      color: white;
+    }
+
+    #navbar ul li a:hover {
+
+      color: black;
+      background-color: white;
+    }
+
+    #home {
+      display: flex;
+      flex-direction: column;
+      padding: 3px 200px;
+      justify-content: center;
+      align-items: center;
+      height: 557px;
+    }
+
+    #home::before {
+      content: "";
+      background: url('static/image1.jpg') no-repeat center center/cover;
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      z-index: -1;
+      opacity: 0.4;
+    }
+
+    .center {
+      margin: 0;
+      padding: 0;
+      background-color: white;
+      width: 400px;
+      border-radius: 10px;
+    }
+
+    .center h1 {
+      text-align: center;
+      padding: 0 0 20px 0;
+      border-bottom: 1px solid silver;
+
+    }
+
+    .center form {
+      padding: 0 40px;
+      box-sizing: border-box;
+
+    }
+
+    .txt_field {
+      position: relative;
+      border-bottom: 2px solid #adadad;
+      margin: 30px 0;
+
+    }
+
+    .txt_field input {
+      width: 100%;
+      padding: 0 5px;
+      height: 40px;
+      font-size: 16px;
+      border: none;
+      background: none;
+      outline: none;
+    }
+
+    .txt_field label {
+      position: absolute;
+      top: 50%;
+      left: 5px;
+      color: #adadad;
+      transform: translateY(-50%);
+      font-size: 16px;
+      pointer-events: none;
+      transition: .5s;
+
+    }
+
+    .txt_field #span::before {
+      content: "";
+      position: absolute;
+      top: 40px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #2691d9;
+      transition: .5s;
+    }
+
+    .txt_field input:focus~label,
+    .txt_field input:valid~label {
+      top: -5px;
+      color: #2691d9;
+    }
+
+    .txt_field input:focus~#span::before .txt_field input:valid~#span::before {
+      width: 100%;
+    }
+
+    input[type="submit"] {
+      width: 100%;
+      height: 50px;
+      border: 1px;
+      background-color: #2691d9;
+      border-radius: 25px;
+      font-size: 18px;
+      color: #e9f4fb;
+      font-weight: 700;
+      cursor: pointer;
+      outline: none;
+    }
+
+    input[type="submit"]:hover {
+      border-color: #2691d9;
+      transition: .5s;
+      border: 2px;
+
+    }
+
+    #btnverify {
+      width: 100%;
+      height: 50px;
+      border: 1px;
+      background-color: #2691d9;
+      border-radius: 25px;
+      font-size: 18px;
+      color: #e9f4fb;
+      font-weight: 700;
+      cursor: pointer;
+      outline: none;
+    }
+
+    #btnverify:hover {
+      border-color: #2691d9;
+      transition: .5s;
+      border: 2px;
+
+    }
+
+    .signup_link {
+      margin: 30px 0;
+      text-align: center;
+      font-size: 16px;
+      color: #666666;
+    }
+
+
+    .signup_link a {
+      color: #2691d9;
+      text-decoration: none;
+    }
+
+    .signup_link a:hover {
+      text-decoration: underline;
+    }
+
+    .match {
+      height: 50px;
+      text-align: center;
+    }
+
+    .alert
+    {
+      text-align: center;
+      background-color: #f44336;
+      color: white;
+    }
+
+    .closebtn{
+      color: white;
+      font-weight: bold;
+      float: right;
+      font-size: 22px;
+      line-height: 20px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .closebtn:hover{
+      color: black;
+    }
+  </style>
+
+</body>
+
+</html>

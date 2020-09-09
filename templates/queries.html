@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="static\jquery-3.5.1.min.js"></script>
+    <script src="static\socket.io.min.js"></script>
+    <title>Queries</title>
+</head>
+
+<body>
+    {%extends "account.html"%}
+
+    {%block content%}
+
+    <section id="root">
+
+        {%for question in questions%}
+        <section id="home">
+            <div class="title" id="{{question[0]}}_title">{{question[2]}}</div>
+            <div class="question" id="{{question[0]}}_question">{{question[3]}}</div>
+            <div class="image" id="{{question[0]}}_question"><img src="{{question[4]}}" height="150px" width="200px"
+                    alt=""></div>
+            {%if session['login']%}
+            <div class="addans" id="{{question[0]}}_adans"><span class="add_ans" id="{{question[0]}}_add_ans">Add answer
+                    to this question</span></div>
+            <div class="formbox" id="{{question[0]}}_formbox" style="display: none;">
+
+                <form class="form" id="{{question[0]}}_form">
+
+                    <div class="txt_field">
+                        <textarea name="" class="answer" id="{{question[0]}}_answer" required></textarea>
+                        <label>Answer</label>
+                    </div>
+
+                    <div class="viewphoto" id="{{question[0]}}_viewphoto"></div>
+
+                    <input type="file" class="answerimage" id="{{question[0]}}_answerimage">
+
+                    <input type="submit" class="add" id="{{question[0]}}_ask" value="Add">
+
+                </form>
+
+            </div>
+            {%endif%}
+            <div class="name" id="{{question[0]}}_name">Asked by: {{question[6]}}</div>
+            {%for answer in answers%}
+            {%if question[0]==answer[0]%}
+            <section id="answers">
+                <div id="ans">{{answer[2]}}</div>
+                <div id="photo"><img src="{{answer[3]}}" height="150px" width="200px" alt=""></div>
+                <div id="answered_by"><span id="ans_by">Answered by: {{answer[4]}}</span></div>
+            </section>
+            {%endif%}
+            {%endfor%}
+        </section>
+        {%endfor%}
+
+    </section>
+
+
+    <style>
+        body {
+            background: linear-gradient(to left, #bdc3c7, #2c3e50);
+            width: 100%;
+            height: 100vh;
+        }
+
+        #root {
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #home {
+
+            width: 1111px;
+            margin-bottom: 40px;
+            border: 1px solid #ff69b4;
+            box-shadow: 0 0 0px #000,
+                0 0 5px #000,
+                0 0 10px #ff69B4,
+                0 0 12px #ff69B4;
+
+            border-radius: 20px;
+        }
+
+        .title {
+            font-size: 22px;
+            color: #fff;
+
+            text-shadow: 0 0 0px #fff,
+                0 0 5px #fff,
+                0 0 10px #0073e6,
+                0 0 15px #0073e6,
+                0 0 20px #0073e6,
+                0 0 25px #0073e6,
+                0 0 30px #0073e6;
+            padding-left: 12px;
+        }
+
+        .question {
+            padding-top: 10px;
+            padding-left: 12px;
+            padding-bottom: 10px;
+            font-size: 17px;
+            color: white;
+            text-shadow: 0 0 0px #fff,
+                0 0 2px #fff,
+                0 0 7px #ff69B4,
+                0 0 12px #ff69B4;
+        }
+
+        .image {
+            padding-left: 10px;
+            padding-bottom: 12px;
+        }
+
+        .name {
+            text-align: right;
+            padding-right: 12px;
+            padding-bottom: 30px;
+        }
+
+        .addans {
+            display: flex;
+            text-align: center;
+            justify-content: center;
+            font-size: 17px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .add_ans:hover {
+            text-shadow: 0 0 0px #fff,
+                0 0 5px #fff,
+                0 0 10px #0073e6,
+                0 0 15px #0073e6,
+                0 0 20px #0073e6,
+                0 0 25px #0073e6,
+                0 0 30px #0073e6;
+        }
+
+        .formbox {
+            width: 400px;
+
+            margin: 5px;
+            background: #fff;
+            margin-left: 357px;
+            padding: 40px;
+            box-sizing: border-box;
+            border: 1px solid rgba(0, 0, 0, .1);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+        }
+
+        textarea {
+            height: 80px;
+            padding: 10px 0;
+            margin-bottom: 40px;
+        }
+
+        .formbox input,
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: none;
+            outline: none;
+            border: none;
+            border-bottom: 2px solid #999;
+        }
+
+        textarea {
+            margin-bottom: 20px;
+        }
+
+        .txt_field {
+            position: relative;
+        }
+
+        .formbox input[type="submit"] {
+            border-bottom: none;
+            cursor: pointer;
+            background: #f7497d;
+            color: #fff;
+            margin-bottom: 0;
+            text-transform: uppercase;
+        }
+
+        .txt_field label {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            color: #999;
+            transition: .5s;
+            pointer-events: none;
+        }
+
+        .formbox input:focus~label,
+        textarea:focus~label,
+        .formbox input:valid~label,
+        textarea:valid~label {
+            top: -12px;
+            left: 0;
+            color: #f7497d;
+            font-weight: bold;
+
+        }
+
+        .formbox input:focus,
+        textarea:focus,
+        .formbox input:valid,
+        textarea:valid {
+            border-bottom: 2px solid #f7497d;
+        }
+
+        .viewphoto {
+            background: no-repeat center center/cover;
+            background-color: lightblue;
+
+            width: 359px;
+            height: 172px;
+            margin-top: 5px;
+            margin-left: -20px;
+            margin-bottom: 30px;
+        }
+
+        .viewphoto_box {
+            background: no-repeat center center/cover;
+            background-color: lightblue;
+
+            width: 359px;
+            height: 172px;
+            margin-top: 0px;
+            margin-left: 0;
+            margin-bottom: 30px;
+        }
+
+        #answers {
+
+
+            margin-bottom: 30px;
+            padding-left: 15px;
+            font-size: 17px;
+            border-bottom: 2px solid black;
+        }
+
+        #ans {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            color: white;
+            text-shadow: 0 0 0px #fff,
+                0 0 2px #fff,
+                0 0 7px #7CFC00,
+                0 0 12px #7cfc00;
+        }
+
+        #answered_by {
+            text-align: right;
+            padding-bottom: 5px;
+        }
+
+        #ans_by {
+            margin-right: 12px;
+
+        }
+    </style>
+
+    <script>
+
+        $(document).ready(function () {
+            $('.answerimage').on('change', function () {
+                var new_id = $(this).attr('id');
+
+                var split_id = new_id.split("_");
+                var time = split_id[0];
+                var idt = split_id[1];
+                var id = time + "_" + "viewphoto";
+                var clas = "viewphoto";
+
+
+                if (typeof (FileReader) != "undefined") {
+                    var photo = $("[id='" + id + "']");
+                    photo.empty();
+
+                    var reader = new FileReader();
+                    reader.onload = function (event) {
+                        window.photo = event.target.result;
+                        $("<img>", {
+                            "src": event.target.result,
+                            "class": "viewphoto_box"
+
+                        }).appendTo(photo);
+                    }
+                    photo.show();
+                    reader.readAsDataURL($(this)[0].files[0]);
+
+                }
+                else {
+                    alert("This browser does not support Filereader");
+                }
+
+            });
+
+            $('.add_ans').click(function () {
+                var id = $(this).attr('id')
+                var idd = id.split("_")
+                var time = idd[0]
+                var new_id = time + "_" + "formbox";
+                $("[id='" + new_id + "']").slideToggle("slower")
+            })
+
+            $('.form').submit(function (event) {
+                var new_id = $(this).attr('id');
+                var idd = new_id.split("_");
+                var time = idd[0];
+                var id = time + "_" + "answer";
+                console.log(id);
+                var a = $("[id='" + id + "']").val();
+                console.log(a);
+                console.log(window.photo);
+
+                try {
+                    $.ajax({
+                        data: {
+                            asked_on: time,
+                            answer: $("[id='" + id + "']").val(),
+                            photo: window.photo
+                        },
+                        type: 'POST',
+                        url: '/answer'
+                    })
+                        .done(function (data) {
+                            console.log("Succed");
+                            $(location).attr("href", "/queries")
+                        });
+                    event.preventDefault();
+                } catch (error) {
+                    $.ajax({
+                        data: {
+                            asked_on: time,
+                            answer: $("[id='" + id + "']").val(),
+                            photo: null
+                        },
+                        type: 'POST',
+                        url: '/answer'
+                    })
+                        .done(function (data) {
+                            console.log("Succed");
+                            $(location).attr("href", "/queries")
+                        });
+                    event.preventDefault();
+                }
+            })
+
+        });
+    </script>
+
+    {%endblock%}
+</body>
+
+</html>
